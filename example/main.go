@@ -28,13 +28,13 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		for i, img := range imgs {
+		// fmt.Println(text)
+		for j, img := range imgs {
 			buf, err := io.ReadAll(img)
 			if err != nil {
 				log.Fatal(err)
 			}
-			os.WriteFile(fmt.Sprintf("page_%d.png", i), buf, 0644)
+			os.WriteFile(fmt.Sprintf("page_%d.png", i*10+j), buf, 0644)
 		}
 		// fmt.Println("text:", text)
 		if err != nil {

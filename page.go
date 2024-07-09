@@ -475,9 +475,11 @@ func (p Page) GetImgs() (imgs []io.ReadCloser, err error) {
 	if strings.Contains(rv.String(), "/IM") {
 		// fmt.Println("ee", rv.String())
 		for _, k := range rv.Keys() {
-			// fmt.Println("k:", k)
-			imgr := rv.Key(k).Reader()
-			imgs = append(imgs, imgr)
+			fmt.Println("k:", k)
+			if strings.HasPrefix(k, "IM") {
+				imgr := rv.Key(k).Reader()
+				imgs = append(imgs, imgr)
+			}
 			// buf, _ := io.ReadAll(imgr)
 			// fmt.Println("buf:", string(buf))
 		}
