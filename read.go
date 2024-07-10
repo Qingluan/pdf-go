@@ -710,6 +710,7 @@ func (v Value) Keys() []string {
 // Index returns a null Value.
 func (v Value) Index(i int) Value {
 	x, ok := v.data.(array)
+	// fmt.Println("x:", x, "ix:", i)
 	if !ok || i < 0 || i >= len(x) {
 		return Value{}
 	}

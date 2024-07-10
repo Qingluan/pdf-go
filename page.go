@@ -23,6 +23,7 @@ type Page struct {
 // Page numbers are indexed starting at 1, not 0.
 // If the page is not found, Page returns a Page with p.V.IsNull().
 func (r *Reader) Page(num int) Page {
+	fmt.Println(" \n------ \n")
 	num-- // now 0-indexed
 	page := r.Trailer().Key("Root").Key("Pages")
 Search:
@@ -32,6 +33,10 @@ Search:
 			return Page{}
 		}
 		kids := page.Key("Kids")
+
+		// l:
+		// kids.Keys()
+		// kids.Index()
 		for i := 0; i < kids.Len(); i++ {
 			kid := kids.Index(i)
 			if kid.Key("Type").Name() == "Pages" {
@@ -44,7 +49,10 @@ Search:
 				continue
 			}
 			if kid.Key("Type").Name() == "Page" {
+
 				if num == 0 {
+					// fmt.Println("ix:", i, kid.Kind(), kid.Key("Contents").Kind())
+
 					return Page{kid}
 				}
 				num--
@@ -191,9 +199,6 @@ func (f Font) getEncoder() TextEncoding {
 func (f *Font) charmapEncoding() TextEncoding {
 	toUnicode := f.V.Key("ToUnicode")
 	if toUnicode.Kind() == Stream {
-		// rr := toUnicode.Reader()
-		// ff, _ := io.ReadAll(rr)
-		// fmt.Println("chan", gs.Str(string(ff[:200])).Color("g"))
 		m := readCmap(toUnicode)
 		if m == nil {
 			return &nopEncoder{}
@@ -398,6 +403,8 @@ func readCmap(toUnicode Value) *cmap {
 		default:
 			if strings.HasSuffix(op, "-cmap") {
 				stk.Push(Value{nil, objptr{}, op})
+			} else {
+				println("interp\t", op)
 			}
 			// fmt.Println("uni:", toUnicode)
 			// println("interp\t", op)
@@ -479,11 +486,14 @@ func (p Page) GetImgs() (imgs []io.ReadCloser, err error) {
 	// fmt.Println("res:", res.Keys())
 	rv := res.Key("XObject")
 	// fmt.Println("v:", res.Keys())
-	if strings.Contains(rv.String(), "/IM") {
+	rvk := strings.ToLower(rv.String())
+
+	if strings.Contains(rvk, "/im") {
 		// fmt.Println("ee", rv.String())
 		for _, k := range rv.Keys() {
 			fmt.Println("k:", k)
-			if strings.HasPrefix(k, "IM") {
+			kl := strings.ToLower(k)
+			if strings.HasPrefix(kl, "im") {
 				imgr := rv.Key(k).Reader()
 				imgs = append(imgs, imgr)
 			}
@@ -511,7 +521,7 @@ func (p Page) GetText() (result string, err error) {
 		if _, ok := fonts[name]; !ok {
 			f := p.Font(name)
 			fonts[name] = &f
-			// fmt.Println("f:", name, f.Widths())
+			// fmt.Println("f:", name, f)
 		}
 	}
 
@@ -548,7 +558,6 @@ func (p Page) GetPlainText(fonts map[string]*Font) (result string, err error) {
 			return
 		}
 		for _, ch := range enc.Decode(s) {
-			// fmt.Print(" ch:", gs.Str(string(ch)).Color("g").String())
 			_, err := textBuilder.WriteRune(ch)
 			if err != nil {
 				panic(err)
@@ -559,7 +568,10 @@ func (p Page) GetPlainText(fonts map[string]*Font) (result string, err error) {
 	var last_y float64
 	var count int
 	var lst_sep float64
-
+	// fmt.Println("Content:", strm)
+	if strm.Kind() == Array {
+		return
+	}
 	Interpret(strm, func(stk *Stack, op string) {
 		n := stk.Len()
 		args := make([]Value, n)

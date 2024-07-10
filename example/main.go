@@ -20,6 +20,7 @@ func main() {
 
 	for i := 1; i <= pages; i++ {
 		p := r.Page(i)
+		// fmt.Println("1")
 		text, err := p.GetText()
 		if err != nil {
 			log.Fatal(err)
@@ -28,7 +29,7 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println(text)
+		// fmt.Println(text)
 		for j, img := range imgs {
 			buf, err := io.ReadAll(img)
 			if err != nil {
