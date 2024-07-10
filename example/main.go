@@ -28,7 +28,7 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		// fmt.Println(text)
+		fmt.Println(text)
 		for j, img := range imgs {
 			buf, err := io.ReadAll(img)
 			if err != nil {

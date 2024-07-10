@@ -50,7 +50,6 @@ func newDict() Value {
 // points to Unicode code points.
 //
 // There is no support for executable blocks, among other limitations.
-//
 func Interpret(strm Value, do func(stk *Stack, op string)) {
 	rd := strm.Reader()
 	b := newBuffer(rd, 0)
@@ -67,10 +66,12 @@ Reading:
 			break
 		}
 		if kw, ok := tok.(keyword); ok {
+			// fmt.Println("kw:", kw, "dicts:", dicts)
 			switch kw {
 			case "null", "[", "]", "<<", ">>":
 				break
 			default:
+
 				for i := len(dicts) - 1; i >= 0; i-- {
 					if v, ok := dicts[i][name(kw)]; ok {
 						stk.Push(Value{nil, objptr{}, v})
@@ -107,7 +108,10 @@ Reading:
 					panic("def without open dict")
 				}
 				val := stk.Pop()
-				key, ok := stk.Pop().data.(name)
+				q := stk.Pop()
+				// fmt.Println("q:", q, dicts, kw)
+				key, ok := q.data.(name)
+				// fmt.Println("val:", val, "key:", key, " stk:", stk)
 				if !ok {
 					panic("def of non-name")
 				}

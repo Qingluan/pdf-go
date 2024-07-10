@@ -191,6 +191,9 @@ func (f Font) getEncoder() TextEncoding {
 func (f *Font) charmapEncoding() TextEncoding {
 	toUnicode := f.V.Key("ToUnicode")
 	if toUnicode.Kind() == Stream {
+		// rr := toUnicode.Reader()
+		// ff, _ := io.ReadAll(rr)
+		// fmt.Println("chan", gs.Str(string(ff[:200])).Color("g"))
 		m := readCmap(toUnicode)
 		if m == nil {
 			return &nopEncoder{}
@@ -393,7 +396,11 @@ func readCmap(toUnicode Value) *cmap {
 			stk.Pop().Name() // key
 			stk.Push(value)
 		default:
-			println("interp\t", op)
+			if strings.HasSuffix(op, "-cmap") {
+				stk.Push(Value{nil, objptr{}, op})
+			}
+			// fmt.Println("uni:", toUnicode)
+			// println("interp\t", op)
 		}
 	})
 	if !ok {
@@ -552,6 +559,7 @@ func (p Page) GetPlainText(fonts map[string]*Font) (result string, err error) {
 	var last_y float64
 	var count int
 	var lst_sep float64
+
 	Interpret(strm, func(stk *Stack, op string) {
 		n := stk.Len()
 		args := make([]Value, n)
