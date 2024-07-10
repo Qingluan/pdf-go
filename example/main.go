@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	r, err := pdf.Open(os.Args[1])
+	r, err := pdf.Open("b.pdf")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -29,7 +29,7 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		// fmt.Println(text)
+		fmt.Println("imgs:", len(imgs))
 		for j, img := range imgs {
 			buf, err := io.ReadAll(img)
 			if err != nil {
@@ -37,7 +37,7 @@ func main() {
 			}
 			os.WriteFile(fmt.Sprintf("page_%d.png", i*10+j), buf, 0644)
 		}
-		// fmt.Println("text:", text)
+		fmt.Println("text:", text)
 		if err != nil {
 			return
 		}

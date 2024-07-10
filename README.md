@@ -5,6 +5,11 @@ this repo  based on [dslipak's pdf](https://github.com/dslipak/pdf)
 ## changed
 
  [x] add image parse
+    [x] /Im (png, jpeg, jpg)
+    [x] DeviceGray 
+    [x] DeviceRGB
+    [ ] DeviceCMYK
+
  [x] add new line parse
 
 ## usage 

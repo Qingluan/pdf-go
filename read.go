@@ -75,6 +75,22 @@ import (
 	"strconv"
 )
 
+// A ValueKind specifies the kind of data underlying a Value.
+type ValueKind int
+
+// The PDF value kinds.
+const (
+	Null ValueKind = iota
+	Bool
+	Integer
+	Real
+	String
+	Name
+	Dict
+	Array
+	Stream
+)
+
 // A Reader is a single PDF file open for reading.
 type Reader struct {
 	f          io.ReaderAt
@@ -471,22 +487,6 @@ type Value struct {
 func (v Value) IsNull() bool {
 	return v.data == nil
 }
-
-// A ValueKind specifies the kind of data underlying a Value.
-type ValueKind int
-
-// The PDF value kinds.
-const (
-	Null ValueKind = iota
-	Bool
-	Integer
-	Real
-	String
-	Name
-	Dict
-	Array
-	Stream
-)
 
 // Kind reports the kind of value underlying v.
 func (v Value) Kind() ValueKind {

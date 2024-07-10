@@ -23,7 +23,7 @@ type Page struct {
 // Page numbers are indexed starting at 1, not 0.
 // If the page is not found, Page returns a Page with p.V.IsNull().
 func (r *Reader) Page(num int) Page {
-	fmt.Println(" \n------ \n")
+	// fmt.Println(" \n------ \n")
 	num-- // now 0-indexed
 	page := r.Trailer().Key("Root").Key("Pages")
 Search:
@@ -51,7 +51,7 @@ Search:
 			if kid.Key("Type").Name() == "Page" {
 
 				if num == 0 {
-					// fmt.Println("ix:", i, kid.Kind(), kid.Key("Contents").Kind())
+					fmt.Println("ix:", i, kid.Kind(), kid.Key("Contents").Kind())
 
 					return Page{kid}
 				}
@@ -475,7 +475,7 @@ type gstate struct {
 }
 
 // GetImgs
-func (p Page) GetImgs() (imgs []io.ReadCloser, err error) {
+func (p Page) GetImgs() (imgs []io.Reader, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			// result = ""
@@ -485,26 +485,48 @@ func (p Page) GetImgs() (imgs []io.ReadCloser, err error) {
 	res := p.Resources()
 	// fmt.Println("res:", res.Keys())
 	rv := res.Key("XObject")
-	// fmt.Println("v:", res.Keys())
-	rvk := strings.ToLower(rv.String())
 
-	if strings.Contains(rvk, "/im") {
-		// fmt.Println("ee", rv.String())
-		for _, k := range rv.Keys() {
-			fmt.Println("k:", k)
-			kl := strings.ToLower(k)
-			if strings.HasPrefix(kl, "im") {
-				imgr := rv.Key(k).Reader()
-				imgs = append(imgs, imgr)
+	// fmt.Println("v:", res.Keys(), res.Key("XObject"))
+	// fmt.Println(p2.Key(p2.Keys()[0]))
+
+	// fmt.Println("Sub:", rv.Keys())
+	// rvk := strings.ToLower(rv.String())
+
+	// if strings.Contains(rvk, "/im") {
+	for _, k := range rv.Keys() {
+		// fmt.Println("k:", k)
+		kl := strings.ToLower(k)
+		if strings.HasPrefix(kl, "im") {
+			xobj := rv.Key(k)
+
+			imgr := xobj.Reader()
+			imgs = append(imgs, imgr)
+		} else {
+			xobj := rv.Key(k)
+			bitPerixel := 8
+			Height := 0
+			Width := 0
+			colorSpace := ""
+			for _, k := range xobj.Keys() {
+				// fmt.Println(k, xobj.Key(k).data)
+				if k == "Width" {
+					Width = int(xobj.Key(k).Int64())
+				} else if k == "Height" {
+					Height = int(xobj.Key(k).Int64())
+				} else if k == "BitsPerComponent" {
+					bitPerixel = int(xobj.Key(k).Int64())
+				} else if k == "ColorSpace" {
+					colorSpace = xobj.Key(k).String()
+				}
 			}
-			// buf, _ := io.ReadAll(imgr)
-			// fmt.Println("buf:", string(buf))
+			fmt.Println("pixel:", bitPerixel, Width, Height, colorSpace)
+			if bitPerixel > 0 && Width > 0 && Height > 0 && colorSpace != "" {
+				imgr := xobj.Reader()
+				imgs = append(imgs, dealImageByBitPerixel(imgr, Width, Height, bitPerixel, colorSpace))
+			}
 		}
-
-		// p.GetImgs()
-
-		// r.Trailer().Index()
 	}
+	// }
 
 	// strm := p.V.Key("Contents")
 	// fmt.Println(p.V.Keys())
