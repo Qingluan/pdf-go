@@ -51,7 +51,7 @@ Search:
 			if kid.Key("Type").Name() == "Page" {
 
 				if num == 0 {
-					fmt.Println("ix:", i, kid.Kind(), kid.Key("Contents").Kind())
+					// fmt.Println("ix:", i, kid.Kind(), kid.Key("Contents").Kind())
 
 					return Page{kid}
 				}
@@ -519,7 +519,7 @@ func (p Page) GetImgs() (imgs []io.Reader, err error) {
 					colorSpace = xobj.Key(k).String()
 				}
 			}
-			fmt.Println("pixel:", bitPerixel, Width, Height, colorSpace)
+			// fmt.Println("pixel:", bitPerixel, Width, Height, colorSpace)
 			if bitPerixel > 0 && Width > 0 && Height > 0 && colorSpace != "" {
 				imgr := xobj.Reader()
 				imgs = append(imgs, dealImageByBitPerixel(imgr, Width, Height, bitPerixel, colorSpace))
